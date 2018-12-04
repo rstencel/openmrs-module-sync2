@@ -4,7 +4,9 @@ import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir.api.client.BasicAuthInterceptor;
 import org.openmrs.module.fhir.api.client.HeaderClientHttpRequestInterceptor;
+import org.openmrs.module.fhir.api.constants.ClientHelperConstants;
 import org.openmrs.module.fhir.api.helper.ClientHelper;
+import org.openmrs.module.sync2.SyncConstants;
 import org.openmrs.module.sync2.api.model.audit.AuditMessage;
 import org.openmrs.module.sync2.api.model.enums.CategoryEnum;
 import org.openmrs.module.sync2.client.RestHttpMessageConverter;
@@ -14,6 +16,7 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.PatientResource1_9;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -21,6 +24,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.stereotype.Component;
 
 import javax.transaction.NotSupportedException;
 import java.net.URI;
@@ -31,11 +35,13 @@ import java.util.Optional;
 
 import static org.openmrs.module.sync2.SyncCategoryConstants.CATEGORY_AUDIT_MESSAGE;
 
+@Component(ClientHelperConstants.CLIENT_HELPER_COMPONENT_PREFIX + SyncConstants.REST_CLIENT)
 public class RESTClientHelper implements ClientHelper {
 
 	public static final String VOIDED = "voided";
 
-	private final RestHttpMessageConverter restConverter = new RestHttpMessageConverter();
+	@Autowired
+	private RestHttpMessageConverter restConverter;
 
 	private final SimpleObjectMessageConverter simpleConverter = new SimpleObjectMessageConverter();
 
@@ -148,6 +154,12 @@ public class RESTClientHelper implements ClientHelper {
 		} else {
 			return ConversionUtil.convert(o, cat.getClazz());
 		}
+	}
+
+	@Override
+	public String extractUUIDFromRestResource(String link) {
+		String[] tokens = link.split("/");
+		return tokens[5].split("\\?")[0];
 	}
 
 	private RestResourceConverter getRestResourceConverter() {

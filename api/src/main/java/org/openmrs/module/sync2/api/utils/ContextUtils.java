@@ -6,6 +6,8 @@ import org.openmrs.module.sync2.SyncConstants;
 import org.openmrs.module.sync2.api.exceptions.SyncException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.core.convert.ConversionService;
 
 import java.util.List;
@@ -32,8 +34,11 @@ public class ContextUtils {
         return Context.getRegisteredComponents(clazz).get(SyncConstants.ZERO);
     }
 
+    @Bean(name="conversionService")
     public static ConversionService getConversionService() {
-        return Context.getRegisteredComponent("conversionService", ConversionService.class);
+        ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
+        bean.afterPropertiesSet();
+        return bean.getObject();
     }
 
     private ContextUtils() {}

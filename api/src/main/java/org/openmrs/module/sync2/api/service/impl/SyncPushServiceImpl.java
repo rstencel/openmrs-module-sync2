@@ -1,5 +1,7 @@
 package org.openmrs.module.sync2.api.service.impl;
 
+import org.openmrs.module.fhir.api.constants.ClientHelperConstants;
+import org.openmrs.module.fhir.api.helper.ClientHelper;
 import org.openmrs.module.sync2.api.exceptions.SyncException;
 import org.openmrs.module.sync2.api.model.SyncObject;
 import org.openmrs.module.sync2.api.service.ParentObjectHashcodeService;
@@ -8,6 +10,7 @@ import org.openmrs.module.sync2.api.service.SyncPushService;
 import org.openmrs.module.sync2.api.filter.impl.PushFilterService;
 import org.openmrs.module.sync2.api.model.audit.AuditMessage;
 import org.openmrs.module.sync2.api.service.UnifyService;
+import org.openmrs.module.sync2.api.utils.ContextUtils;
 import org.openmrs.module.sync2.api.utils.SyncHashcodeUtils;
 import org.openmrs.module.sync2.api.utils.SyncUtils;
 import org.openmrs.module.sync2.client.reader.LocalFeedReader;
@@ -23,7 +26,6 @@ import static org.openmrs.module.sync2.SyncConstants.PUSH_OPERATION;
 import static org.openmrs.module.sync2.api.model.enums.OpenMRSSyncInstance.CHILD;
 import static org.openmrs.module.sync2.api.model.enums.OpenMRSSyncInstance.PARENT;
 import static org.openmrs.module.sync2.api.utils.SyncUtils.getPullUrl;
-import static org.openmrs.module.sync2.api.utils.SyncUtils.extractUUIDFromResourceLinks;
 import static org.openmrs.module.sync2.api.utils.SyncUtils.getPushUrl;
 
 @Component("sync2.syncPushService")
@@ -137,7 +139,10 @@ public class SyncPushServiceImpl extends AbstractSynchronizationService implemen
     public AuditMessage readAndPushObjectToParent(String category, Map<String, String> resourceLinks,
             String action) {
         String clientName = SyncUtils.selectAppropriateClientName(resourceLinks);
-        String uuid = extractUUIDFromResourceLinks(resourceLinks);
+        ClientHelper clientHelper = ContextUtils.getRegisteredComponentSafely(
+                ClientHelperConstants.CLIENT_HELPER_COMPONENT_PREFIX + clientName,
+                ClientHelper.class);
+        String uuid = clientHelper.extractUUIDFromRestResource(resourceLinks.get(clientName));
         return readAndPushObjectToParent(category, resourceLinks, action, clientName, uuid);
     }
 

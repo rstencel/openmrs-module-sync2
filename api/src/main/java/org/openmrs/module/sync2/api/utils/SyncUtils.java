@@ -14,10 +14,10 @@ import org.openmrs.module.atomfeed.api.service.impl.XMLParseServiceImpl;
 import org.openmrs.module.fhir.api.helper.ClientHelper;
 import org.openmrs.module.fhir.api.merge.MergeBehaviour;
 import org.openmrs.module.sync2.SyncConstants;
-import org.openmrs.module.sync2.api.service.SyncConfigurationService;
 import org.openmrs.module.sync2.api.exceptions.SyncException;
 import org.openmrs.module.sync2.api.model.enums.AtomfeedTagContent;
 import org.openmrs.module.sync2.api.model.enums.OpenMRSSyncInstance;
+import org.openmrs.module.sync2.api.service.SyncConfigurationService;
 import org.openmrs.module.sync2.client.ClientHelperFactory;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.slf4j.Logger;
@@ -30,9 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.openmrs.module.sync2.SyncConstants.FHIR_CLIENT;
 import static org.openmrs.module.sync2.SyncConstants.RESOURCE_PREFERRED_CLIENT;
-import static org.openmrs.module.sync2.SyncConstants.REST_CLIENT;
 import static org.openmrs.module.sync2.api.model.enums.OpenMRSSyncInstance.CHILD;
 
 public class SyncUtils {
@@ -135,21 +133,6 @@ public class SyncUtils {
 		return Context.getAdministrationService().getGlobalProperty(RESOURCE_PREFERRED_CLIENT);
 	}
 
-	public static String extractUUIDFromResourceLinks(Map<String, String> resourceLinks) {
-		for (String client : resourceLinks.keySet()) {
-			switch (client) {
-				case REST_CLIENT:
-					return extractUUIDFromRestResource(resourceLinks.get(client));
-				case FHIR_CLIENT:
-					return extractUUIDFromFHIRResource(resourceLinks.get(client));
-				default:
-			}
-		}
-
-		LOGGER.error("Couldn't find any supported client to extract uuid from.");
-		return null;
-	}
-
 	public static boolean compareLocalAndPulled(String clientName, String category, Object from, Object dest) {
 		boolean result = false;
 		if (null != dest && null != from) {
@@ -166,18 +149,6 @@ public class SyncUtils {
 		}
 
 		return result;
-	}
-
-	private static String extractUUIDFromRestResource(String link) {
-		String[] tokens = link.split("/");
-		// todo throw custom sync2 exception if tokens.length != 6
-		return tokens[5].split("\\?")[0];
-	}
-
-	private static String extractUUIDFromFHIRResource(String link) {
-		String[] tokens = link.split("/");
-		// todo throw custom sync2 exception if tokens.length != 5
-		return tokens[4];
 	}
 
 	public static <T> String prettySerialize(Map<T, T> map) {

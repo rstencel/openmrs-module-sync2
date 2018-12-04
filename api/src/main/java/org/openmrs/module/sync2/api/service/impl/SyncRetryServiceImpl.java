@@ -2,12 +2,15 @@ package org.openmrs.module.sync2.api.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.api.APIException;
+import org.openmrs.module.fhir.api.constants.ClientHelperConstants;
+import org.openmrs.module.fhir.api.helper.ClientHelper;
 import org.openmrs.module.sync2.api.service.SyncAuditService;
 import org.openmrs.module.sync2.api.service.SyncPullService;
 import org.openmrs.module.sync2.api.service.SyncPushService;
 import org.openmrs.module.sync2.api.service.SyncRetryService;
 import org.openmrs.module.sync2.api.exceptions.SyncException;
 import org.openmrs.module.sync2.api.model.audit.AuditMessage;
+import org.openmrs.module.sync2.api.utils.ContextUtils;
 import org.openmrs.module.sync2.api.utils.SyncConfigurationUtils;
 import org.openmrs.module.sync2.api.utils.SyncUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import static org.openmrs.module.sync2.SyncConstants.PULL_OPERATION;
 import static org.openmrs.module.sync2.SyncConstants.PUSH_OPERATION;
-import static org.openmrs.module.sync2.api.utils.SyncUtils.extractUUIDFromResourceLinks;
 
 @Component("sync2.SyncRetryService")
 public class SyncRetryServiceImpl implements SyncRetryService {
@@ -44,7 +46,11 @@ public class SyncRetryServiceImpl implements SyncRetryService {
     }
 
     private AuditMessage retryPush(AuditMessage message) {
-        String uuid = extractUUIDFromResourceLinks(message.getAvailableResourceUrlsAsMap());
+        String clientType = message.getLinkType();
+        ClientHelper clientHelper = ContextUtils.getRegisteredComponentSafely(
+                ClientHelperConstants.CLIENT_HELPER_COMPONENT_PREFIX + clientType,
+                ClientHelper.class);
+        String uuid = clientHelper.extractUUIDFromRestResource(message.getAvailableResourceUrlsAsMap().get(clientType));
 
         AuditMessage newMessage =
                 syncPushService.readAndPushObjectToParent(
@@ -60,7 +66,11 @@ public class SyncRetryServiceImpl implements SyncRetryService {
     }
 
     private AuditMessage retryPull(AuditMessage message) {
-        String uuid = extractUUIDFromResourceLinks(message.getAvailableResourceUrlsAsMap());
+        String clientType = message.getLinkType();
+        ClientHelper clientHelper = ContextUtils.getRegisteredComponentSafely(
+                ClientHelperConstants.CLIENT_HELPER_COMPONENT_PREFIX + clientType,
+                ClientHelper.class);
+        String uuid = clientHelper.extractUUIDFromRestResource(message.getAvailableResourceUrlsAsMap().get(clientType));
 
         AuditMessage newMessage =
                 syncPullService.pullAndSaveObjectFromParent(

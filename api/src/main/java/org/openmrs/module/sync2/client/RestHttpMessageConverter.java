@@ -11,12 +11,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 
 import static org.openmrs.module.sync2.api.utils.SyncUtils.createDefaultGson;
 
+@Component("sync2.restHttpMessageConverter")
 public class RestHttpMessageConverter extends AbstractHttpMessageConverter<RestResource> {
 
     private static final String CHARSET = "UTF-8";

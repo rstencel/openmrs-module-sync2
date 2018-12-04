@@ -77,12 +77,15 @@
     </bean>
 
     <bean parent="serviceContext">
-    <property name="moduleService">
-    <list>
-        <value>org.openmrs.module.sync2.api.service.MergeConflictService</value>
-        <ref bean="sync2.mergeConflictService" />
-    </list>
-    </property>
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.sync2.api.service.MergeConflictService</value>
+                <ref bean="sync2.mergeConflictService" />
+            </list>
+        </property>
     </bean>
+
+    <bean id="conversionService"
+          class="org.springframework.context.support.ConversionServiceFactoryBean"/>
 
 </beans>

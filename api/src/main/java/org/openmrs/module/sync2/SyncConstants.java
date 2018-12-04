@@ -44,8 +44,6 @@ public class SyncConstants {
 
     public static final String PUSH_OPERATION = "PUSH";
 
-    public static final String FHIR_CLIENT = "fhir";
-
     public static final String REST_CLIENT = "rest";
 
     public static final String RECENT_FEED = "recent";
